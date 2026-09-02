@@ -1,0 +1,71 @@
+rules_version = '2';
+
+// قواعد أمان قاعدة البيانات لموقع دورة "كزرع اخرج شطأه"
+// الصقي هذا الملف كامل داخل Firebase Console > Firestore Database > Rules
+//
+// ملاحظة مهمة: هذي حماية "أساسية" مناسبة لموقع دورة داخلية بين مجموعة
+// معروفة من الأشخاص (حافظات + مشرفة)، وليست حماية بمستوى بنكي — لأن
+// الموقع بدون سيرفر خاص (Backend)، والتحقق من رمز المشرفة (2026) يصير
+// من المتصفح مباشرة. هذا كافٍ تماماً لغرض دورة قرآنية.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function myRole() {
+      return get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role;
+    }
+
+    // ملفات تعريف المستخدمات: اسم المستخدم + الدور (حافظة / مشرفة / أدمن)
+    match /profiles/{uid} {
+      allow read: if isSignedIn();
+
+      // إنشاء حساب جديد: يقدر أي مستخدم يسوي ملفه الشخصي بنفسه بدور
+      // "حافظة" أو "مشرفة" فقط، ما يقدر يسوي نفسه "أدمن".
+      // الاستثناء الوحيد: حساب admin نفسه (يُبنى تلقائياً أول مرة يسجل
+      // فيها دخول admin/admin123 حسب كود الموقع).
+      // الأدمن أيضاً يقدر يسوي ملف تعريف لأي حافظة يضيفها يدوياً.
+      allow create: if isSignedIn() && (
+        (request.auth.uid == uid &&
+          (
+            (request.resource.data.role == 'hafitha' || request.resource.data.role == 'mushrifa') ||
+            (request.resource.data.username == 'admin' && request.resource.data.role == 'admin')
+          )
+        ) ||
+        myRole() == 'admin'
+      );
+
+      // تعديل الملف: صاحبته تقدر تعدل بياناتها لكن ما تقدر تغيّر دورها
+      // أو اسم المستخدم بنفسها؛ الأدمن يقدر يعدل أي شي.
+      allow update: if isSignedIn() && (
+        (request.auth.uid == uid &&
+          request.resource.data.role == resource.data.role &&
+          request.resource.data.username == resource.data.username) ||
+        myRole() == 'admin'
+      );
+
+      allow delete: if isSignedIn() && myRole() == 'admin';
+    }
+
+    // نقاط المهام اليومية لكل حافظة
+    match /progress/{uid} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && (request.auth.uid == uid || myRole() == 'admin');
+    }
+
+    // درجات الاختبار الأسبوعية — تدخلها المشرفة أو الأدمن فقط
+    match /tests/{uid} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && (myRole() == 'mushrifa' || myRole() == 'admin');
+    }
+
+    // خطة المراجعة اليومية الشخصية لكل حافظة
+    match /reviewPlans/{uid} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && (request.auth.uid == uid || myRole() == 'admin');
+    }
+  }
+}

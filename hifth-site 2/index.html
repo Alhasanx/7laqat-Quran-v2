@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>كزرع اخرج شطأه</title>
+<meta name="description" content="موقع دورة الحفظ المكثفة كزرع اخرج شطأه" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- شاشة تحميل مبدئية -->
+<div id="loadingScreen">
+  <div class="spinner"></div>
+  <div>...جارِ التحميل</div>
+</div>
+
+<!-- شاشة تسجيل الدخول / حساب جديد -->
+<div id="authScreen" class="auth-wrap" hidden>
+  <div class="auth-card">
+    <div class="brand">
+      <span class="leaf">🌱</span>
+      <h1>كزرع اخرج شطأه</h1>
+      <p>دورة الحفظ المكثفة</p>
+    </div>
+
+    <div class="auth-tabs">
+      <button id="btnShowLogin" class="active" type="button">تسجيل الدخول</button>
+      <button id="btnShowSignup" type="button">حساب جديد</button>
+    </div>
+
+    <!-- تسجيل الدخول -->
+    <form id="loginForm">
+      <div class="field">
+        <label>اسم المستخدم</label>
+        <input type="text" id="loginUsername" autocomplete="username" required />
+      </div>
+      <div class="field">
+        <label>كلمة المرور</label>
+        <input type="password" id="loginPassword" autocomplete="current-password" required />
+      </div>
+      <button class="btn-main" type="submit" id="loginSubmitBtn">دخول</button>
+    </form>
+
+    <!-- حساب جديد -->
+    <form id="signupForm" hidden>
+      <div class="field">
+        <label>اسم المستخدم</label>
+        <input type="text" id="signupUsername" required minlength="3" />
+      </div>
+      <div class="field">
+        <label>كلمة المرور</label>
+        <input type="password" id="signupPassword" required minlength="6" />
+      </div>
+      <div class="field">
+        <label>نوع الحساب</label>
+        <div class="role-choice">
+          <label id="roleHafithaLabel" class="checked">
+            <input type="radio" name="signupRole" value="hafitha" checked />
+            🌸 حافظة
+          </label>
+          <label id="roleMushrifaLabel">
+            <input type="radio" name="signupRole" value="mushrifa" />
+            🌿 مشرفة
+          </label>
+        </div>
+      </div>
+      <div class="field" id="mushrifaCodeField" hidden>
+        <label>رمز المشرفة</label>
+        <input type="text" id="signupCode" placeholder="أدخلي الرمز" />
+      </div>
+      <button class="btn-main" type="submit" id="signupSubmitBtn">تسجيل الحساب</button>
+    </form>
+
+    <div id="authMsg"></div>
+  </div>
+</div>
+
+<!-- التطبيق بعد الدخول -->
+<div id="appShell" hidden>
+  <div class="topbar">
+    <div class="topbar-row">
+      <div>
+        <h1>كزرع اخرج شطأه</h1>
+        <div class="sub" id="welcomeLine"></div>
+      </div>
+      <button class="logout-btn" id="logoutBtn" type="button">خروج</button>
+    </div>
+    <div class="points-pill" id="pointsPill" hidden>🏅 <span id="pointsPillValue">0</span> نقطة</div>
+  </div>
+
+  <div class="tabbar" id="tabbar"></div>
+
+  <main class="container" id="tabContent"></main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase (compat SDKs, تعمل مباشرة بدون أدوات بناء) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+
+<script src="firebase-config.js"></script>
+<script src="quran-data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
