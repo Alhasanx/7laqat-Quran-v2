@@ -25,12 +25,12 @@
 // ============================================================
 
 const firebaseConfig = {
-  apiKey: "ضعي-هنا-قيمة-apiKey",
-  authDomain: "ضعي-هنا-قيمة-authDomain",
-  projectId: "ضعي-هنا-قيمة-projectId",
-  storageBucket: "ضعي-هنا-قيمة-storageBucket",
-  messagingSenderId: "ضعي-هنا-قيمة-messagingSenderId",
-  appId: "ضعي-هنا-قيمة-appId",
+  apiKey: "AIzaSyBlO-btOOvjA1ZJIiaX18FCNTQ2A3RUE74",
+  authDomain: "halaqa-v2.firebaseapp.com",
+  projectId: "halaqa-v2",
+  storageBucket: "halaqa-v2.firebasestorage.app",
+  messagingSenderId: "265502846830",
+  appId: "1:265502846830:web:cb5a8cb6b9fdb6dbd65b7f",
 };
 
 firebase.initializeApp(firebaseConfig);
