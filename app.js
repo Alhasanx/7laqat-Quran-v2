@@ -210,16 +210,21 @@ function clearAuthMsg() {
   el.textContent = ""; el.className = "";
 }
 
+// ملاحظة: تُستخدم فقط من لوحة الأدمن (وقتها المستخدمة مسجلة دخولها فعلاً
+// فتقدر تقرأ من Firestore حسب القواعد). ما تُستخدم في تسجيل حساب جديد
+// عادي لأن المستخدمة الجديدة لسه ما سجلت دخولها، والقواعد ما تسمح بالقراءة
+// قبل تسجيل الدخول.
 async function usernameExists(username) {
   const snap = await db.collection("profiles").where("username", "==", username).limit(1).get();
   return !snap.empty;
 }
 
 async function doSignup(username, password, role) {
-  if (await usernameExists(username)) {
-    showAuthMsg("اسم المستخدم موجود مسبقاً، اختاري اسم آخر", "error");
-    return;
-  }
+  // ما نتحقق من تكرار اسم المستخدم هنا (المستخدمة الجديدة لسه ما سجلت
+  // دخولها، فما تقدر تقرأ من Firestore). بدل كذا نعتمد على أن كل اسم
+  // مستخدم يتحول لبريد إلكتروني فريد، فلو الاسم مستخدم من قبل، Firebase
+  // Auth نفسه يرفض بخطأ "auth/email-already-in-use" ونعرض رسالة واضحة
+  // (بالأسفل في signupErrorText).
   const cred = await auth.createUserWithEmailAndPassword(usernameToEmail(username), password);
   await db.collection("profiles").doc(cred.user.uid).set({
     username, role, createdAt: firebase.firestore.FieldValue.serverTimestamp(),
