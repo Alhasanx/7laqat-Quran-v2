@@ -234,19 +234,28 @@ async function doSignup(username, password, role) {
 async function doLogin(username, password) {
   const email = usernameToEmail(username);
   if (username.toLowerCase() === "admin") {
-    try {
-      await auth.signInWithEmailAndPassword(email, password);
-      return;
-    } catch (err) {
-      if (err.code === "auth/user-not-found" && password === "admin123") {
+    // ملاحظة: إصدارات Firebase Auth الحديثة ترجع خطأ عام "auth/invalid-credential"
+    // بدل "auth/user-not-found" (حماية من تخمين البريد الإلكتروني)، فما نقدر
+    // نعتمد على كود الخطأ لمعرفة إذا حساب الأدمن موجود أو لا. بدل كذا: أول
+    // مرة أحد يسجل دخول بكلمة مرور admin123 نحاول ننشئ الحساب مباشرة؛ لو
+    // كان موجود مسبقاً (auth/email-already-in-use) نرجع نسجل الدخول عادي.
+    if (password === "admin123") {
+      try {
         const cred = await auth.createUserWithEmailAndPassword(email, "admin123");
         await db.collection("profiles").doc(cred.user.uid).set({
           username: "admin", role: "admin", createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
         return;
+      } catch (err) {
+        if (err.code === "auth/email-already-in-use") {
+          await auth.signInWithEmailAndPassword(email, password);
+          return;
+        }
+        throw err;
       }
-      throw err;
     }
+    await auth.signInWithEmailAndPassword(email, password);
+    return;
   }
   await auth.signInWithEmailAndPassword(email, password);
 }
@@ -856,7 +865,7 @@ async function generateDailyPlan() {
 }
 
 /* ============================================================
-   تبويب "حاسبة المراجعة التراكمية"
+   حاسبة المراجعة التراكمية"
 ============================================================ */
 const calcState = { unit: "ayat", mode: "auto" };
 
